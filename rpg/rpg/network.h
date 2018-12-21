@@ -9,10 +9,12 @@
 
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
+#include <boost/enable_shared_from_this.hpp>
 #include <iostream>
 #include <functional>
 
 #include "buff.h"
+#include "counter.h"
 
 using namespace std;
 using namespace boost;
@@ -22,65 +24,118 @@ typedef ip::tcp::socket _SocketType;
 typedef boost::shared_ptr<_SocketType> _SocketPtr;
 typedef boost::shared_ptr<io_service> _IoServicePtr;
 class Session;
+class SessionPool;
+typedef boost::shared_ptr<Session> _SessionPtr;
+typedef boost::shared_ptr<SessionPool> _SessionPoolPtr;
 
 #define MAX_ONLINE_ROLE_NUM 100 // 最大上限数目
+
 
 class SessionPool
 {
 public:
 	int max_num = MAX_ONLINE_ROLE_NUM;
-	std::map<int, Session*> all_session_map;
+	std::map<int, _SessionPtr> all_session_map;
 
-	void join(Session*);
+	int join(_SessionPtr);
+	void remove(int id);
 };
 
-void SessionPool::join(Session* sock_ptr)
+int SessionPool::join(_SessionPtr session)
 {
 	if (this->all_session_map.size() >= this->max_num)
 	{
 		std::cout << "角色池已达上限" << std::endl;
-		return;
+		return -1;
 	}
+	int new_id = Counter::GetInstance()->get_count();
+	all_session_map.insert(std::make_pair(new_id, session));
+	return new_id;
+}
 
+void SessionPool::remove(int id)
+{
+	std::map<int, _SessionPtr>::iterator key = all_session_map.find(id);
+	if (key != all_session_map.end())
+	{
+		all_session_map.erase(key);
+	}
+	printf("session %i has remove from room, room size: %i", id, all_session_map.size());
 }
 
 
-class Session
+class Session :public boost::enable_shared_from_this<Session>
 {
 public:
 	_SocketType socket;
-	SessionPool*  role_pool;
+	_SessionPoolPtr  role_pool;
 	Buff read_buff;
 	Buff write_buff;
+	int id;
 
-	Session(_IoServicePtr service_ptr) :socket(*service_ptr){};
+	Session(_IoServicePtr service_ptr, _SessionPoolPtr pool_ptr) :socket(*service_ptr), role_pool(pool_ptr){};
 	void handle_read();
 	void handle_write();
-	void on_read(boost::system::error_code err, std::size_t bytes);
+	void on_read_head(boost::system::error_code err);
+	void on_read_body(boost::system::error_code err);
+	void deliver(const char* message);
 };
 
-// 绑定每个session的接受处理
+// 绑定每个session的消息处理
 void Session::handle_read()
 {
-	//this->socket.async_read_some(boost::asio::buffer(this->read_buff.m_char), boost::bind(&Session::on_read, this, _1, _2));
-	boost::asio::async_read(this->socket, boost::asio::buffer(this->read_buff.m_char), boost::bind(&Session::on_read, this, _1, _2));
+	int id = this->role_pool->join(shared_from_this());
+	this->id = id;
+
+	boost::asio::async_read(
+		this->socket, 
+		boost::asio::buffer(this->read_buff.m_char, BUFF_HEAD_SIZE),
+		boost::bind(&Session::on_read_head, shared_from_this(), boost::asio::placeholders::error));
 }
 
-void Session::on_read(boost::system::error_code err, std::size_t bytes)
+// 接受消息头
+void Session::on_read_head(boost::system::error_code err)
 {
-	if (err)
+	if (!err && this->read_buff.decode_header())
 	{
-		printf("on_read error %i", err);
-		return;
+		std::cout << "head msg: " << this->read_buff.recv_length << std::endl;
+		boost::asio::async_read(
+			this->socket,
+			boost::asio::buffer(this->read_buff.body(), BUFF_BODY_SIZE),
+			boost::bind(&Session::on_read_body, shared_from_this(), boost::asio::placeholders::error));
 	}
 	else
 	{
-		std::cout << "recv bytes: " << bytes << std::endl;
-		string msg(this->read_buff.m_char, bytes);
-		std::cout << "recv: " << msg << std::endl;
-		this->handle_read();
+		std::cout << 1111 << err << std::endl;
+		this->role_pool->remove(this->id);
 	}
 }
+
+// 接受消息体
+void Session::on_read_body(boost::system::error_code err)
+{
+	if (!err)
+	{
+		this->deliver(this->read_buff.body());
+		std::cout << "head msg: " << this->read_buff.recv_length << std::endl;
+		boost::asio::async_read(
+			this->socket,
+			boost::asio::buffer(this->read_buff.m_char, BUFF_HEAD_SIZE),
+			boost::bind(&Session::on_read_head, shared_from_this(), boost::asio::placeholders::error));
+	}
+	else
+	{
+		std::cout << 2222 << std::endl;
+		this->role_pool->remove(this->id);
+	}
+}
+
+
+void Session::deliver(const char* message)
+{
+	std::cout << message << std::endl;
+}
+
 
 
 
@@ -101,7 +156,7 @@ public:
 	~Network(){};
 	void listen();
 	void run();
-	void connect_handle(boost::system::error_code);
+	void connect_handle(_SessionPtr, boost::system::error_code);
 };
 
 Network::Network(int port) :
@@ -114,16 +169,11 @@ role_pool(new SessionPool)
 {
 }
 
-void Network::connect_handle(boost::system::error_code e_code)
+void Network::connect_handle(_SessionPtr session, boost::system::error_code e_code)
 {
-	// 把每个连接封装为一个session并放入玩家池
 	if (!e_code)
 	{
-		std::cout << "接受请求" << std::endl;
-		Session session(this->service);
-		session.handle_read();
-		this->role_pool->join(&session);
-
+		session->handle_read();
 	}
 	this->listen();
 }
@@ -132,7 +182,9 @@ void Network::connect_handle(boost::system::error_code e_code)
 
 void Network::listen()
 {
-	(*(this->acceptor)).async_accept(*this->listen_sock, boost::bind(&Network::connect_handle, this, boost::asio::placeholders::error));
+	_SessionPtr session(new Session(this->service, this->role_pool));
+
+	(*(this->acceptor)).async_accept(*this->listen_sock, boost::bind(&Network::connect_handle, this, session, boost::asio::placeholders::error));
 }
 
 void Network::run()

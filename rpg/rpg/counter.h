@@ -6,6 +6,10 @@
  *
  * \brief 计数器
  */
+#ifndef _counter_
+#define _counter_
+
+
 #include "singleton.h"
 
 // 单调递增的计数器
@@ -24,3 +28,5 @@ public:
 		return now;
 	}
 };
+
+#endif

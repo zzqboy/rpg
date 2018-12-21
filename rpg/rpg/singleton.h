@@ -8,6 +8,8 @@
  * 可以使用用锁的方式，但是对性能有影响
  * 也可以在多线程启动前去主动new一个，在多线程的时候就自动保证了线程安全
  */
+#ifndef _singleton_
+#define _singleton_
 
 template<class T>
 class Singleton{
@@ -37,3 +39,5 @@ public:
 
 template<class T>
 T* Singleton<T>::instance;
+
+#endif

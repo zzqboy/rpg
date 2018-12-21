@@ -22,7 +22,7 @@ class client:
 
 	def pack(self, data):
 		s_length = len(data)
-		p_d = struct.pack("%ss"%s_length, data)
+		p_d = struct.pack("i%ss"%s_length, 1, data)
 		print s_length, p_d
 		return p_d
 
@@ -31,4 +31,7 @@ if __name__ == "__main__":
 	my_client = client()
 	while(1):
 		s = raw_input(">:")
-		my_client.send(s)
+		print my_client
+
+		print "send:", s
+		#my_client.send(s)

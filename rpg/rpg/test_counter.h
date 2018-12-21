@@ -22,8 +22,7 @@ struct use_count
 		for (int i = 0; i < 100; ++i)
 		{
 			boost::mutex::scoped_lock lock(io_mutex);
-			Counter* c = Counter::GetInstance();
-			printf("now id %i count %p --> %i \n", id, c, c->get_count());
+			printf("now id %i count %p --> %i \n", id, Counter::GetInstance(), Counter::GetInstance()->get_count());
 		}
 	}
 	int id;
