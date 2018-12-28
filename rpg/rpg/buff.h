@@ -10,8 +10,10 @@
 #define _buff_
 
 #include <boost/asio.hpp>
-#define BUFF_HEAD_SIZE 4 // 消息头 传递消息体最大字节数
-#define BUFF_BODY_SIZE 1024 //msg body最大1024b
+#include <stdlib.h>
+#include <stdio.h> 
+#define BUFF_HEAD_SIZE 4
+#define BUFF_BODY_SIZE 512
 
 
 class Buff
@@ -23,29 +25,46 @@ public:
 	Buff(){}
 	~Buff() {}
 
-	int size(){ return BUFF_HEAD_SIZE + BUFF_BODY_SIZE; }
-	char* data(){ return this->m_char; }
+	int size()
+	{
+		return BUFF_HEAD_SIZE + BUFF_BODY_SIZE;
+	}
 
-	bool decode_header() // 判断消息头是否合法
+	char* data()
+	{
+		return this->m_char;
+	}
+
+
+	bool decode_header()
 	{
 		char header[BUFF_HEAD_SIZE + 1] = "";
 		std::strncat(header, m_char, BUFF_HEAD_SIZE);
-		int h_l = std::atoi(header);
-		if (h_l > BUFF_BODY_SIZE)
+		this->recv_length = std::atoi(header);
+		std::cout << "recv msg head: " << this->recv_length << std::endl;
+		if (this->recv_length > BUFF_BODY_SIZE)
 		{
-			printf("消息头的长度过大");
 			return false;
 		}
 		else
 		{
-			this->recv_length = h_l;
 			return true;
 		}
+	}
+
+	char* head()
+	{
+		return m_char;
 	}
 
 	char* body()
 	{
 		return m_char + BUFF_HEAD_SIZE;
+	}
+
+	void reset()
+	{
+		
 	}
 };
 

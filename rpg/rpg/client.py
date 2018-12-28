@@ -12,7 +12,7 @@ int 结束标志
 class client:
 	def __init__(self):
 		self.host = '127.0.0.1' 
-		self.port = 8001
+		self.port = 8888
 		self.addr = (self.host, self.port)
 		self.sock = socket.socket()
 		self.sock.connect(self.addr)
@@ -21,9 +21,7 @@ class client:
 		self.sock.send(self.pack(data))
 
 	def pack(self, data):
-		s_length = len(data)
-		p_d = struct.pack("i%ss"%s_length, 1, data)
-		print s_length, p_d
+		p_d = struct.pack("i", data)
 		return p_d
 
 
@@ -31,7 +29,4 @@ if __name__ == "__main__":
 	my_client = client()
 	while(1):
 		s = raw_input(">:")
-		print my_client
-
-		print "send:", s
-		#my_client.send(s)
+		my_client.send(s)

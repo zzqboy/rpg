@@ -39,7 +39,7 @@
     <ClInclude Include="test_counter.h">
       <Filter>源文件\test</Filter>
     </ClInclude>
-    <ClInclude Include="test_network.h">
+    <ClInclude Include="asio_example.h">
       <Filter>源文件\test</Filter>
     </ClInclude>
   </ItemGroup>

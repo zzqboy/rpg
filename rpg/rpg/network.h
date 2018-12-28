@@ -50,6 +50,7 @@ int SessionPool::join(_SessionPtr session)
 	}
 	int new_id = Counter::GetInstance()->get_count();
 	all_session_map.insert(std::make_pair(new_id, session));
+	printf("session %i has join\n", new_id);
 	return new_id;
 }
 
@@ -60,7 +61,7 @@ void SessionPool::remove(int id)
 	{
 		all_session_map.erase(key);
 	}
-	printf("session %i has remove from room, room size: %i", id, all_session_map.size());
+	printf("session %i has remove from room, room size: %i\n", id, all_session_map.size());
 }
 
 
@@ -73,10 +74,11 @@ public:
 	Buff write_buff;
 	int id;
 
-	Session(_IoServicePtr service_ptr, _SessionPoolPtr pool_ptr) :socket(*service_ptr), role_pool(pool_ptr){};
+	Session(io_service& service, _SessionPoolPtr pool_ptr) :socket(service), role_pool(pool_ptr){};
+	~Session(){};
 	void handle_read();
 	void handle_write();
-	void on_read_head(boost::system::error_code err);
+	void on_read_head(const boost::system::error_code& err, std::size_t size);
 	void on_read_body(boost::system::error_code err);
 	void deliver(const char* message);
 };
@@ -86,15 +88,15 @@ void Session::handle_read()
 {
 	int id = this->role_pool->join(shared_from_this());
 	this->id = id;
-
+	// 重置接受缓存
 	boost::asio::async_read(
-		this->socket, 
-		boost::asio::buffer(this->read_buff.m_char, BUFF_HEAD_SIZE),
-		boost::bind(&Session::on_read_head, shared_from_this(), boost::asio::placeholders::error));
+		this->socket,
+		boost::asio::buffer(this->read_buff.head(), BUFF_HEAD_SIZE),
+		boost::bind(&Session::on_read_head, shared_from_this(), boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
 }
 
 // 接受消息头
-void Session::on_read_head(boost::system::error_code err)
+void Session::on_read_head(const boost::system::error_code& err, std::size_t bytes)
 {
 	if (!err && this->read_buff.decode_header())
 	{
@@ -106,7 +108,6 @@ void Session::on_read_head(boost::system::error_code err)
 	}
 	else
 	{
-		std::cout << 1111 << err << std::endl;
 		this->role_pool->remove(this->id);
 	}
 }
@@ -121,11 +122,10 @@ void Session::on_read_body(boost::system::error_code err)
 		boost::asio::async_read(
 			this->socket,
 			boost::asio::buffer(this->read_buff.m_char, BUFF_HEAD_SIZE),
-			boost::bind(&Session::on_read_head, shared_from_this(), boost::asio::placeholders::error));
+			boost::bind(&Session::on_read_head, shared_from_this(), boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
 	}
 	else
 	{
-		std::cout << 2222 << std::endl;
 		this->role_pool->remove(this->id);
 	}
 }
@@ -145,26 +145,25 @@ public:
 	typedef void(*handle_func)(Network*  n_ptr, boost::system::error_code);
 
 	int port;
-	_IoServicePtr service;
-	boost::shared_ptr<ip::tcp::endpoint> accept_port;
-	boost::shared_ptr<ip::tcp::acceptor> acceptor;
+	io_service& service;
+	ip::tcp::endpoint accept_port;
+	ip::tcp::acceptor acceptor;
 	_SocketPtr listen_sock;
 	boost::shared_ptr<SessionPool> role_pool;
 
 
-	Network(int port);
+	Network(int port, io_service& io_server);
 	~Network(){};
 	void listen();
-	void run();
 	void connect_handle(_SessionPtr, boost::system::error_code);
 };
 
-Network::Network(int port) :
+Network::Network(int port, io_service& io_server) :
 port(port),
-service(new boost::asio::io_service()),
-accept_port(new ip::tcp::endpoint(ip::tcp::v4(), this->port)),
-acceptor(new ip::tcp::acceptor(*this->service, *this->accept_port)),
-listen_sock(new _SocketType(*this->service)),
+service(io_server),
+accept_port(ip::tcp::endpoint(ip::tcp::v4(), this->port)),
+acceptor(ip::tcp::acceptor(this->service, this->accept_port)),
+listen_sock(new _SocketType(this->service)),
 role_pool(new SessionPool)
 {
 }
@@ -184,11 +183,6 @@ void Network::listen()
 {
 	_SessionPtr session(new Session(this->service, this->role_pool));
 
-	(*(this->acceptor)).async_accept(*this->listen_sock, boost::bind(&Network::connect_handle, this, session, boost::asio::placeholders::error));
-}
-
-void Network::run()
-{
-	this->service->run();
+	this->acceptor.async_accept(session->socket, boost::bind(&Network::connect_handle, this, session, boost::asio::placeholders::error));
 }
 

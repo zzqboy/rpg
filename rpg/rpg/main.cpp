@@ -6,28 +6,34 @@
  *
  * \brief ×ÜÈë¿Ú
  */
-#include <boost/thread/thread.hpp>
-#include <boost/thread/mutex.hpp>
 #include <iostream>
 #include <stdio.h>
-#include "counter.h"
+#include <boost/thread/thread.hpp>
+#include <boost/thread/mutex.hpp>
 
-#include "test_counter.h"
-#include "test_network.h"
+#include "counter.h"
+#include "network.h"
+using namespace std;
+
+typedef boost::shared_ptr<Network> _NetWorkPtr;
 
 int main(int argc, char* argv[])
 {
-try
-{
-	Counter::New();
+	try
+	{
+		Counter::New();
+		boost::asio::io_service io_service;
 
-	Network my_network(8001);
-	my_network.listen();
-	my_network.run();
+		_NetWorkPtr my_network(new Network(8888, io_service));
+		my_network->listen();
+		io_service.run();
 
-}
-catch (std::exception& e)
-{
-	std::cerr << "Exception: " << e.what() << "\n";
-}
+		std::cout << "end...." << std::endl;
+		cin.get();
+		return 0;
+	}
+	catch (std::exception& e)
+	{
+		std::cerr << "Exception: " << e.what() << "\n";
+	}
 }
