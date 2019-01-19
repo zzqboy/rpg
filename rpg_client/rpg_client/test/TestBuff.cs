@@ -1,4 +1,4 @@
-ï»¿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,13 +10,12 @@ namespace Test
 {
 	class TestBuff
 	{
-		Buff test_buff = new Buff(1024);
-		Dictionary<string, Func<byte[]>> func_dict;
-
+		Buff test_buff = new Buff(5);
 
 		public void test()
 		{
-			while(true)
+			Console.WriteLine("ring buff test");
+			while (true)
 			{
 				string opr = Console.ReadLine();
 				run_opr(opr);
@@ -24,39 +23,45 @@ namespace Test
 
 		}
 
-		//public void run_opr(string fun)
-		//{ 
-		//	// åˆ©ç”¨åå°„è°ƒç”¨ç›¸åº”æ–¹æ³•
-		//	MethodInfo method = this.m_type.GetMethod(fun, new Type[] { typeof(byte[]) });
-		//	object[] parameters = new object[] { };
-		//	method.Invoke(this.instance, parameters);
-		//}
-
 		public void write()
 		{
-			Console.WriteLine("è¯·è¾“å…¥");
+			Console.WriteLine("ÇëÊäÈëÊı¾İ");
 			string input_str = Console.ReadLine();
 			byte[] write_data = Encoding.UTF8.GetBytes(input_str);
 
-			Console.WriteLine("äºŒè¿›åˆ¶æ•°æ®ï¼š byte({1} --> {2})", input_str, BitConverter.ToString(write_data));
+			Console.WriteLine("¶ş½øÖÆÊı¾İ£º byte({0} --> {1})", input_str, BitConverter.ToString(write_data));
 			this.test_buff.write(write_data, write_data.Length);
 			this.debug();
 		}
 
 		public void read()
 		{
-			Console.WriteLine("è¯·è¾“å…¥");
+			Console.WriteLine("ÇëÊäÈë¶ÁÈ¡size");
 			int size = int.Parse(Console.ReadLine());
 			byte[] read_data = new byte[size];
 			this.test_buff.read(read_data, size);
-			Console.WriteLine("è¯»å–ï¼š byte({1})", BitConverter.ToString(read_data));
+			Console.WriteLine("¶ÁÈ¡£º byte({0})", BitConverter.ToString(read_data));
 			this.debug();
 		}
 
 		public void debug()
 		{
-			Console.WriteLine("ç¼“å†²æ•°æ®ï¼š {1}", BitConverter.ToString(this.test_buff.GetBuff()));
-			Console.WriteLine("è¯»æŒ‡é’ˆï¼š {1} å†™æŒ‡é’ˆ : {2} æœ‰ç”¨ç©ºé—´: {3}", this.test_buff.GetReadPos(), this.test_buff.GetWritePos(), this.test_buff.GetEmptySize());
+			Console.WriteLine("»º³åÊı¾İ£º {0}", BitConverter.ToString(this.test_buff.GetBuff()));
+			Console.WriteLine("¶ÁÖ¸Õë£º {0} Ğ´Ö¸Õë : {1} ÓĞÓÃ¿Õ¼ä: {2}", this.test_buff.GetReadPos(), this.test_buff.GetWritePos(), this.test_buff.GetEmptySize());
+		}
+
+		// ·´ÉäÔËĞĞº¯Êı
+		public object run_opr(string method_name)
+		{
+			//Type[] ptype = new Type[param.Length];
+			//for(int i=0;i<ptype.Length;i++)
+			//	ptype[i] = param[i].GetType();
+			
+			Type p=this.GetType();
+			MethodInfo m = p.GetMethod(method_name, new Type[]{});
+			if(m != null)
+				return m.Invoke(this, new object[]{});
+			return null;
 		}
 	}
 }

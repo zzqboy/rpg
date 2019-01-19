@@ -29,13 +29,23 @@ public class Buff
 		// 容量不足 需要扩容
 		if (this.GetEmptySize() < size)
 		{
-			this.resize(size);
+			int re_size = this.tol_size * 2;
+			this.resize(re_size);
 			this.write(send_data, size);
+			return;
 		}
-		else
+		if (this.tol_size > this.)
+		{
+		}
+		if((this.tol_size - this.write_pos) >= size)
 		{
 			Array.Copy(send_data, 0, this.m_data, this.write_pos, size);
 			this.write_pos += size;
+		}
+		else
+		{
+			Array.Copy(send_data, 0, this.m_data, this.write_pos, this.tol_size - this.write_pos);
+			Array.Copy(send_data, 0, this.m_data, 0, this.)
 		}
 	}
 
@@ -92,12 +102,13 @@ public class Buff
 		if (size <= this.tol_size) { return; }
 
 		byte[] new_data = new byte[size];
+		int write_size = this.GetReadableSize();
 		if(this.read(new_data, this.GetReadableSize()))
 		{
 			this.m_data = new_data;
 		}
 		this.read_pos = 0;
-		this.write_pos = this.GetReadableSize();
+		this.write_pos = write_size;
 		this.tol_size = size;
 	}
 	/************************************************************************/
