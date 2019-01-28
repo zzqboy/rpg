@@ -34,9 +34,6 @@ public class Buff
 			this.write(send_data, size);
 			return;
 		}
-		if (this.tol_size > this.)
-		{
-		}
 		if((this.tol_size - this.write_pos) >= size)
 		{
 			Array.Copy(send_data, 0, this.m_data, this.write_pos, size);
@@ -45,7 +42,13 @@ public class Buff
 		else
 		{
 			Array.Copy(send_data, 0, this.m_data, this.write_pos, this.tol_size - this.write_pos);
-			Array.Copy(send_data, 0, this.m_data, 0, this.)
+			Array.Copy(send_data, this.tol_size - this.write_pos, this.m_data, 0, size - (this.tol_size - this.write_pos));
+			// 这个时候写指针移到读指针前面
+			this.write_pos = size - (this.tol_size - this.write_pos);
+			if (this.write_pos == this.read_pos)
+			{ 
+
+			}
 		}
 	}
 
@@ -76,7 +79,7 @@ public class Buff
 			else
 			{
 				Array.Copy(this.m_data, this.read_pos, read_data, 0, this.tol_size - this.read_pos);
-				Array.Copy(this.m_data, 0, read_data, this.tol_size - this.read_pos + 1, size - (this.tol_size - this.read_pos));
+				Array.Copy(this.m_data, 0, read_data, this.tol_size - this.read_pos, size - (this.tol_size - this.read_pos));
 				this.read_pos = size - (this.tol_size - this.read_pos);
 				if (this.read_pos == this.write_pos) { this.reset(); }
 			}
@@ -128,13 +131,24 @@ public class Buff
 
 	public int GetEmptySize()
 	{
-		if (this.write_pos >= this.read_pos)
+		if (this.write_pos > this.read_pos)
 		{
 			return this.read_pos + this.tol_size - this.write_pos;
 		}
-		else
+		if(this.read_pos > this.write_pos)
 		{
 			return this.read_pos - this.write_pos;
+		}
+		// 到这里两个指针都是一样的位置
+		if (read_pos == 0)
+		{
+			// 位于数组头，没有用过
+			return this.tol_size;
+		}
+		else
+		{
+			// 已经写满 并且读写在中间的某一位置
+			return 0;
 		}
 	}
 
