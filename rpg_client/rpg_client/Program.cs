@@ -12,8 +12,8 @@ namespace rpg_client
 	{
 		static void Main(string[] args)
 		{
-			TestBuff test = new TestBuff();
-			test.test();
+			TestSocket s = new TestSocket();
+			s.test();
 		}
 	}
 }

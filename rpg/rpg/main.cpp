@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
 		Counter::New();
 		boost::asio::io_service io_service;
 
-		_NetWorkPtr my_network(new Network(8888, io_service));
+		_NetWorkPtr my_network(new Network(9000, io_service));
 		my_network->listen();
 		io_service.run();
 
