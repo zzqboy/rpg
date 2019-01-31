@@ -12,14 +12,14 @@
 #include <boost/asio.hpp>
 #include <stdlib.h>
 #include <stdio.h> 
-#define BUFF_HEAD_SIZE 4
-#define BUFF_BODY_SIZE 512
+#define BUFF_HEAD_SIZE 4  // 先接收一个4个字节的整数头，表示消息体的长度
+#define MAX_BUFF_BODY_SIZE 1024  // 一个消息体的最大长度
 
 
 class Buff
 {
 public:
-	char m_char[BUFF_HEAD_SIZE + BUFF_BODY_SIZE];
+	char m_char[BUFF_HEAD_SIZE + MAX_BUFF_BODY_SIZE];
 	int recv_length; // 表示本次收到的消息体长度
 
 	Buff(){}
@@ -27,7 +27,7 @@ public:
 
 	int size()
 	{
-		return BUFF_HEAD_SIZE + BUFF_BODY_SIZE;
+		return BUFF_HEAD_SIZE + MAX_BUFF_BODY_SIZE;
 	}
 
 	char* data()
@@ -40,9 +40,11 @@ public:
 	{
 		char header[BUFF_HEAD_SIZE + 1] = "";
 		std::strncat(header, m_char, BUFF_HEAD_SIZE);
-		this->recv_length = std::atoi(header);
+
+		this->recv_length = *(int*)header;
 		std::cout << "recv msg head: " << this->recv_length << std::endl;
-		if (this->recv_length > BUFF_BODY_SIZE)
+
+		if (this->recv_length > MAX_BUFF_BODY_SIZE)
 		{
 			return false;
 		}
@@ -64,7 +66,7 @@ public:
 
 	void reset()
 	{
-		
+		memset(this->m_char, 0, sizeof(this->m_char));
 	}
 };
 

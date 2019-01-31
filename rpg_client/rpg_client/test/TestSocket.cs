@@ -20,8 +20,11 @@ namespace Test
 			byte[] data = Pack.StructToBytes(p);
 			byte[] head = BitConverter.GetBytes(data.Length);
 
+			Console.WriteLine("二进制数据： byte({0})", BitConverter.ToString(data));
 			s.SyncSend(head);
-			//s.SyncSend(data);
+			s.SyncSend(data);
+
+			int size = int.Parse(Console.ReadLine());
 		}
 	}
 }

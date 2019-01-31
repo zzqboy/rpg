@@ -76,19 +76,27 @@ public:
 
 	Session(io_service& service, _SessionPoolPtr pool_ptr) :socket(service), role_pool(pool_ptr){};
 	~Session(){};
+	void join_pool();
 	void handle_read();
 	void handle_write();
 	void on_read_head(const boost::system::error_code& err, std::size_t size);
-	void on_read_body(boost::system::error_code err);
+	void on_read_body(const boost::system::error_code&, std::size_t);
 	void deliver(const char* message);
 };
+
+// 加入角色池
+void Session::join_pool()
+{
+	int id = this->role_pool->join(shared_from_this());
+	this->id = id;
+	this->handle_read();
+}
 
 // 绑定每个session的消息处理
 void Session::handle_read()
 {
-	int id = this->role_pool->join(shared_from_this());
-	this->id = id;
 	// 重置接受缓存
+	this->read_buff.reset();
 	boost::asio::async_read(
 		this->socket,
 		boost::asio::buffer(this->read_buff.head(), BUFF_HEAD_SIZE),
@@ -98,13 +106,19 @@ void Session::handle_read()
 // 接受消息头
 void Session::on_read_head(const boost::system::error_code& err, std::size_t bytes)
 {
-	if (!err && this->read_buff.decode_header())
+	if (!err)
 	{
-		std::cout << "head msg: " << this->read_buff.recv_length << std::endl;
-		boost::asio::async_read(
-			this->socket,
-			boost::asio::buffer(this->read_buff.body(), BUFF_BODY_SIZE),
-			boost::bind(&Session::on_read_body, shared_from_this(), boost::asio::placeholders::error));
+		if (this->read_buff.decode_header())
+		{
+			boost::asio::async_read(
+				this->socket,
+				boost::asio::buffer(this->read_buff.body(), this->read_buff.recv_length), // 由消息体确定接下来消息体的长度
+				boost::bind(&Session::on_read_body, shared_from_this(), boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+		}
+		else
+		{
+			std::cout << "recv msg size too big" << std::endl;
+		}
 	}
 	else
 	{
@@ -113,16 +127,12 @@ void Session::on_read_head(const boost::system::error_code& err, std::size_t byt
 }
 
 // 接受消息体
-void Session::on_read_body(boost::system::error_code err)
+void Session::on_read_body(const boost::system::error_code& err, std::size_t bytes)
 {
 	if (!err)
 	{
 		this->deliver(this->read_buff.body());
-		std::cout << "head msg: " << this->read_buff.recv_length << std::endl;
-		boost::asio::async_read(
-			this->socket,
-			boost::asio::buffer(this->read_buff.m_char, BUFF_HEAD_SIZE),
-			boost::bind(&Session::on_read_head, shared_from_this(), boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+		this->handle_read();
 	}
 	else
 	{
@@ -133,7 +143,7 @@ void Session::on_read_body(boost::system::error_code err)
 
 void Session::deliver(const char* message)
 {
-	std::cout << message << std::endl;
+	printf("%s", message);
 }
 
 
@@ -172,7 +182,7 @@ void Network::connect_handle(_SessionPtr session, boost::system::error_code e_co
 {
 	if (!e_code)
 	{
-		session->handle_read();
+		session->join_pool();
 	}
 	this->listen();
 }
