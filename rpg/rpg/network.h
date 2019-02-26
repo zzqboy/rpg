@@ -15,6 +15,8 @@
 
 #include "buff.h"
 #include "counter.h"
+#include "message_dispatch.h"
+
 
 using namespace std;
 using namespace boost;
@@ -37,6 +39,8 @@ public:
 	int max_num = MAX_ONLINE_ROLE_NUM;
 	std::map<int, _SessionPtr> all_session_map;
 
+	SessionPool();
+	~SessionPool(){};
 	int join(_SessionPtr);
 	void remove(int id);
 };
@@ -64,17 +68,24 @@ void SessionPool::remove(int id)
 	printf("session %i has remove from room, room size: %i\n", id, all_session_map.size());
 }
 
+SessionPool::SessionPool()
+{
+	// 初始化session id计数器
+	Counter::New();
+}
+
 
 class Session :public boost::enable_shared_from_this<Session>
 {
 public:
 	_SocketType socket;
 	_SessionPoolPtr  role_pool;
+	MessageDispatch* msg_patch_p;
 	Buff read_buff;
 	Buff write_buff;
 	int id;
 
-	Session(io_service& service, _SessionPoolPtr pool_ptr) :socket(service), role_pool(pool_ptr){};
+	Session(io_service& service, _SessionPoolPtr pool_ptr, MessageDispatch* patch_p) :socket(service), role_pool(pool_ptr), msg_patch_p(patch_p){};
 	~Session(){};
 	void join_pool();
 	void handle_read();
@@ -143,7 +154,9 @@ void Session::on_read_body(const boost::system::error_code& err, std::size_t byt
 
 void Session::deliver(const char* message)
 {
-	printf("%s", message);
+	int* msg_id_p = (int*)message;
+	const char* body = message + 4;
+	this->msg_patch_p->Dispatch(*msg_id_p, body);
 }
 
 
@@ -155,27 +168,32 @@ public:
 	typedef void(*handle_func)(Network*  n_ptr, boost::system::error_code);
 
 	int port;
-	io_service& service;
+	io_service service;
 	ip::tcp::endpoint accept_port;
 	ip::tcp::acceptor acceptor;
 	_SocketPtr listen_sock;
 	boost::shared_ptr<SessionPool> role_pool;
+	MessageDispatch msg_dispatch;
 
 
-	Network(int port, io_service& io_server);
+	Network(int port);
 	~Network(){};
 	void listen();
 	void connect_handle(_SessionPtr, boost::system::error_code);
+	void run();
 };
 
-Network::Network(int port, io_service& io_server) :
+Network::Network(int port):
 port(port),
-service(io_server),
+service(boost::asio::io_service()),
 accept_port(ip::tcp::endpoint(ip::tcp::v4(), this->port)),
 acceptor(ip::tcp::acceptor(this->service, this->accept_port)),
 listen_sock(new _SocketType(this->service)),
-role_pool(new SessionPool)
+role_pool(new SessionPool),
+msg_dispatch(MessageDispatch())
 {
+	// 协议分派事件
+	msg_dispatch.InitEvent();
 }
 
 void Network::connect_handle(_SessionPtr session, boost::system::error_code e_code)
@@ -191,8 +209,12 @@ void Network::connect_handle(_SessionPtr session, boost::system::error_code e_co
 
 void Network::listen()
 {
-	_SessionPtr session(new Session(this->service, this->role_pool));
+	_SessionPtr session(new Session(this->service, this->role_pool, &this->msg_dispatch));
 
 	this->acceptor.async_accept(session->socket, boost::bind(&Network::connect_handle, this, session, boost::asio::placeholders::error));
 }
 
+void Network::run()
+{
+	this->service.run();
+}

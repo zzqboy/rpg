@@ -7,6 +7,8 @@
  * \brief  消息处理模块 分派消息注册函数
  */
 #include <map>
+#include "login.h"
+
 
 // 定义函数指针
 typedef void(*fun_ptr)(const char* message);
@@ -14,6 +16,7 @@ typedef void(*fun_ptr)(const char* message);
 class MessageDispatch
 {
 public:
+	void InitEvent();
 	void Register(int msg_id, fun_ptr fun);
 	void Dispatch(int msg_id, const char* message);
 protected:
@@ -46,4 +49,9 @@ void MessageDispatch::Dispatch(int msg_id, const char* message)
 		auto fun = this->fun_map[msg_id];
 		fun(message);
 	}
+}
+
+void MessageDispatch::InitEvent()
+{
+	this->Register(1, Login::CreateRole);
 }

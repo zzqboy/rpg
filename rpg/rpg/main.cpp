@@ -11,24 +11,19 @@
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
 
-#include "counter.h"
-#include "network.h"
+#include "server.h"
 using namespace std;
 
-typedef boost::shared_ptr<Network> _NetWorkPtr;
 
 int main(int argc, char* argv[])
 {
 	try
 	{
-		Counter::New();
-		boost::asio::io_service io_service;
-
-		_NetWorkPtr my_network(new Network(9000, io_service));
-		my_network->listen();
-		io_service.run();
-
-		std::cout << "end...." << std::endl;
+		// 初始化
+		Server my_server;
+		// 开始循环
+		my_server.run();
+		std::cout << "finish init server...." << std::endl;
 		cin.get();
 		return 0;
 	}

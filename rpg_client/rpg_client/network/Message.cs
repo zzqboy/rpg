@@ -13,6 +13,9 @@ namespace GameClient
 
 		[MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
 		public char[] name;
+
+		[MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
+		public char[] password;
 	}
 
 	class Pack

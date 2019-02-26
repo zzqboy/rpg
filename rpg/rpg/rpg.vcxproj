@@ -74,7 +74,11 @@
     <ClInclude Include="asio_example.h" />
     <ClInclude Include="buff.h" />
     <ClInclude Include="counter.h" />
+    <ClInclude Include="login.h" />
+    <ClInclude Include="login_proto.h" />
+    <ClInclude Include="message_dispatch.h" />
     <ClInclude Include="network.h" />
+    <ClInclude Include="server.h" />
     <ClInclude Include="singleton.h" />
     <ClInclude Include="test_counter.h" />
   </ItemGroup>

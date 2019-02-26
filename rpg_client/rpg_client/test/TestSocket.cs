@@ -15,8 +15,9 @@ namespace Test
 			s.Connect();
 
 			Ping p = new Ping();
-			p.id = 0;
+			p.id = 1;
 			p.name = "hello".PadRight(20, '\0').ToCharArray();
+			p.password = "hello".PadRight(20, '\0').ToCharArray();
 			byte[] data = Pack.StructToBytes(p);
 			byte[] head = BitConverter.GetBytes(data.Length);
 

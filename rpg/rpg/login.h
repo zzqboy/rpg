@@ -6,22 +6,25 @@
  *
  * \brief  µÇÂ¼Ä£¿é
  */
-#ifndef _singleton_
-#define _singleton_
-
-struct LoginS
-{
-	char name[20];
-	char password[20];
-};
+#ifndef _login_
+#define _login_
+#include "login_proto.h"
 
 class Login
 {
 public:
-	void CreateRole(const char* msg);
+	static void CreateRole(const char* msg);
 	void InitRole(const char* msg);
-	void Start();
+	static void Start();
 private:
 };
+
+void Login::CreateRole(const char* msg)
+{
+	Proto::Login* login_s = (Proto::Login*)msg;
+	printf("create role %s %s", login_s->name, login_s->password);
+}
+
+
 
 #endif
