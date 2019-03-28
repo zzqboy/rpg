@@ -53,5 +53,6 @@ void MessageDispatch::Dispatch(int msg_id, const char* message)
 
 void MessageDispatch::InitEvent()
 {
+	// µÇÂ¼Ð­Òé
 	this->Register(1, Login::CreateRole);
 }

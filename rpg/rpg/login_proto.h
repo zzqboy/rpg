@@ -6,6 +6,8 @@
  *
  * \brief µÇÂ¼½á¹¹Ìå
  */
+#ifndef _login_proto_
+#define _login_proto_
 #pragma pack(1)
 
 namespace Proto
@@ -18,3 +20,4 @@ namespace Proto
 }
 
 #pragma pack()
+#endif

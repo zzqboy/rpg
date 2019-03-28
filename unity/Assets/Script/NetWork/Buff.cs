@@ -28,8 +28,8 @@ namespace GameClient
 		/************************************************************************/
 		public void write(byte[] send_data, int size)
 		{
-			// 容量不足 需要扩容
-			if (this.GetEmptySize() < size)
+			// 容量不足 需要扩容 这里加1 是为了避免两个指针在同一个位置
+			if ((this.GetEmptySize() - 1)< size)
 			{
 				int re_size = this.tol_size * 2;
 				this.resize(re_size);
@@ -49,7 +49,7 @@ namespace GameClient
 				this.write_pos = size - (this.tol_size - this.write_pos);
 				if (this.write_pos == this.read_pos)
 				{
-
+					// 按理不会执行到
 				}
 			}
 		}
@@ -108,7 +108,7 @@ namespace GameClient
 
 			byte[] new_data = new byte[size];
 			int write_size = this.GetReadableSize();
-			if (this.read(new_data, this.GetReadableSize()))
+			if (this.read(new_data, write_size))
 			{
 				this.m_data = new_data;
 			}

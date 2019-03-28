@@ -6,9 +6,10 @@
  *
  * \brief 游戏服务器管理的各个服务
  */
+#include "singleton.h"
 #include "network.h"
 
-class Server
+class Server :public Singleton<Server>
 {
 public:
 	Server();

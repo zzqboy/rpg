@@ -79,13 +79,13 @@ class Session :public boost::enable_shared_from_this<Session>
 {
 public:
 	_SocketType socket;
-	_SessionPoolPtr  role_pool;
+	_SessionPoolPtr  session_pool;
 	MessageDispatch* msg_patch_p;
 	Buff read_buff;
 	Buff write_buff;
 	int id;
 
-	Session(io_service& service, _SessionPoolPtr pool_ptr, MessageDispatch* patch_p) :socket(service), role_pool(pool_ptr), msg_patch_p(patch_p){};
+	Session(io_service& service, _SessionPoolPtr pool_ptr, MessageDispatch* patch_p) :socket(service), session_pool(pool_ptr), msg_patch_p(patch_p){};
 	~Session(){};
 	void join_pool();
 	void handle_read();
@@ -98,7 +98,7 @@ public:
 // 加入角色池
 void Session::join_pool()
 {
-	int id = this->role_pool->join(shared_from_this());
+	int id = this->session_pool->join(shared_from_this());
 	this->id = id;
 	this->handle_read();
 }
@@ -133,7 +133,7 @@ void Session::on_read_head(const boost::system::error_code& err, std::size_t byt
 	}
 	else
 	{
-		this->role_pool->remove(this->id);
+		this->session_pool->remove(this->id);
 	}
 }
 
@@ -147,7 +147,7 @@ void Session::on_read_body(const boost::system::error_code& err, std::size_t byt
 	}
 	else
 	{
-		this->role_pool->remove(this->id);
+		this->session_pool->remove(this->id);
 	}
 }
 
@@ -172,7 +172,7 @@ public:
 	ip::tcp::endpoint accept_port;
 	ip::tcp::acceptor acceptor;
 	_SocketPtr listen_sock;
-	boost::shared_ptr<SessionPool> role_pool;
+	boost::shared_ptr<SessionPool> session_pool;
 	MessageDispatch msg_dispatch;
 
 
@@ -189,7 +189,7 @@ service(boost::asio::io_service()),
 accept_port(ip::tcp::endpoint(ip::tcp::v4(), this->port)),
 acceptor(ip::tcp::acceptor(this->service, this->accept_port)),
 listen_sock(new _SocketType(this->service)),
-role_pool(new SessionPool),
+session_pool(new SessionPool),
 msg_dispatch(MessageDispatch())
 {
 	// 协议分派事件
@@ -209,7 +209,7 @@ void Network::connect_handle(_SessionPtr session, boost::system::error_code e_co
 
 void Network::listen()
 {
-	_SessionPtr session(new Session(this->service, this->role_pool, &this->msg_dispatch));
+	_SessionPtr session(new Session(this->service, this->session_pool, &this->msg_dispatch));
 
 	this->acceptor.async_accept(session->socket, boost::bind(&Network::connect_handle, this, session, boost::asio::placeholders::error));
 }
