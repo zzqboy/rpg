@@ -141,6 +141,7 @@
     <ClInclude Include="asio_example.h" />
     <ClInclude Include="buff.h" />
     <ClInclude Include="counter.h" />
+    <ClInclude Include="db_work.h" />
     <ClInclude Include="login.h" />
     <ClInclude Include="login_proto.h" />
     <ClInclude Include="message_dispatch.h" />
@@ -155,6 +156,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="buff.cpp" />
+    <ClCompile Include="db_work.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="db.cpp" />
     <ClCompile Include="ringbuff.cpp" />

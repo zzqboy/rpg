@@ -8,8 +8,6 @@
  */
 #include <iostream>
 #include <stdio.h>
-#include <boost/thread/thread.hpp>
-#include <boost/thread/mutex.hpp>
 
 #include "server.h"
 #include "test_db.h"
@@ -27,7 +25,7 @@ int main(int argc, char* argv[])
 		//std::cout << "finish init server...." << std::endl;
 		// ²âÊÔ
 		test_db test;
-		test.test();
+		test.test3();
 
 		cin.get();
 		return 0;

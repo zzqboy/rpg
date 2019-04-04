@@ -81,6 +81,9 @@
     <ClInclude Include="test_db.h">
       <Filter>源文件\test</Filter>
     </ClInclude>
+    <ClInclude Include="db_work.h">
+      <Filter>源文件\db</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -97,6 +100,9 @@
     </ClCompile>
     <ClCompile Include="test_db.cpp">
       <Filter>源文件\test</Filter>
+    </ClCompile>
+    <ClCompile Include="db_work.cpp">
+      <Filter>源文件\db</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
