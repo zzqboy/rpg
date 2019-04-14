@@ -48,7 +48,9 @@ DBWork::~DBWork()
 
 void DBWork::add_task(TASK_FUN task_fun)
 {
+	this->get_lock().lock();
 	this->work_queue.push(task_fun);
+	this->get_lock().unlock();
 }
 
 mutex& DBWork::get_lock()
@@ -68,7 +70,7 @@ void DBWork::run()
 	{	
 		thread* t = new thread(do_task, this);
 		t->detach();
-		printf("star run dbwork thread %i\n", n);
+		//printf("star run dbwork thread %i\n", n);
 		this->work_thread[t->get_id()] = t;
 	}
 }

@@ -22,9 +22,9 @@ public:
 	test_db();
 	~test_db();
 
-	void test();
+	void test(bool is_sleep);
 
-	static void task_fun(DBWork*);
+	static void task_fun(DBWork*, bool is_sleep);
 	void test2();
 
 	void run_select(bool is_thread, int count);

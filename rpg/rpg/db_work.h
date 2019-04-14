@@ -13,6 +13,7 @@
 #include <thread>
 #include <mutex>
 #include <ctime>
+#include <iostream>
 #include "db.h"
 #include "singleton.h"
 
