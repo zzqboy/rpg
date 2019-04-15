@@ -1,11 +1,11 @@
-#include "test_db.h"
+ï»¿#include "test_db.h"
 
 
 test_db::test_db()
 {
 	this->db = new DataBase("127.0.0.1", 3306, "root", "root");
 	this->db->connect("rpg");
-	// ¶àÏß³Ì
+	// å¤šçº¿ç¨‹
 	this->db_work = new DBWork(12);
 }
 
