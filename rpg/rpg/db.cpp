@@ -1,4 +1,4 @@
-#include "db.h"
+ï»¿#include "db.h"
 
 DataBase::DataBase(char* host, int port, char* user, char* pwd)
 {
@@ -49,7 +49,7 @@ void DataBase::execute(char* sql)
 		if (result)
 		{
 			col_n = mysql_num_fields(result);
-			while (sql_row = mysql_fetch_row(result))//»ñÈ¡¾ßÌåµÄÊı¾İ
+			while (sql_row = mysql_fetch_row(result))//è·å–å…·ä½“çš„æ•°æ®
 			{
 				for (int i = 0; i < col_n; i++)
 				{
