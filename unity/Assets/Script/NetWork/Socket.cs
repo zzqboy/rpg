@@ -15,7 +15,6 @@ namespace GameClient
 		private IPAddress connect_ip; // 服务器ip
 		private Socket socket = new System.Net.Sockets.Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 		private Buff recv_buff;
-		private int send_size;
 
 		public ClientSocket(string connect_ip = "127.0.0.1")
 		{ 
@@ -29,7 +28,6 @@ namespace GameClient
 
 		public void AsynSend(byte[] data, int size)
 		{
-			this.send_size = size;
 			this.socket.BeginSend(data, 0, data.Length, SocketFlags.None, new AsyncCallback(SendCallback), this.socket);
 		}
 
