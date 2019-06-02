@@ -22,13 +22,14 @@ public:
 	test_db();
 	~test_db();
 
-	void test(bool is_sleep);
 
-	static void task_fun(DBWork*, bool is_sleep);
-	void test2();
-
+	static void task_fun(DBWork*);
 	void run_select(bool is_thread, int count);
+
+	void test();
+	void test2();
 	void test3();
+	void test4();
 private:
 	DataBase* db;
 	DBWork* db_work;
