@@ -66,11 +66,11 @@ bool DBWork::is_task_empty()
 void DBWork::run()
 {
 	// 初始化线程
+	printf("star run dbwork thread %i\n", this->thread_n);
 	for (int n = 0; n < this->thread_n; ++n)
 	{	
 		thread* t = new thread(do_task, this);
 		t->detach();
-		//printf("star run dbwork thread %i\n", n);
 		this->work_thread[t->get_id()] = t;
 	}
 }

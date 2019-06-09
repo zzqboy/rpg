@@ -18,7 +18,7 @@ bool Buff::decode_header()
 	std::strncat(header, m_char, BUFF_HEAD_SIZE);
 
 	this->recv_length = *(int*)header;
-	std::cout << "recv msg head: " << this->recv_length << std::endl;
+	//std::cout << "recv msg head: " << this->recv_length << std::endl;
 
 	if (this->recv_length > MAX_BUFF_BODY_SIZE)
 	{

@@ -21,7 +21,7 @@ class DBWork;
 typedef std::function<void(DBWork*)> TASK_FUN;
 
 
-class DBWork
+class DBWork:public Singleton<DBWork>
 {
 public:
 	DBWork(int thread_num = 2);

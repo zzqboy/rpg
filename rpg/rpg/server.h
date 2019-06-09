@@ -24,6 +24,8 @@ Server::Server()
 	// ¼àÌıÍøÂç
 	this->network = new Network(9000);
 	this->network->listen();
+	// Êı¾İ¿â
+	DBWork::GetInstance()->New();
 }
 
 Server::~Server()
@@ -34,4 +36,5 @@ Server::~Server()
 void Server::run()
 {
 	this->network->run();
+	DBWork::GetInstance()->run();
 }

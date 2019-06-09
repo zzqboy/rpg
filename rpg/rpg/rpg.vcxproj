@@ -153,10 +153,12 @@
     <ClInclude Include="singleton.h" />
     <ClInclude Include="test_counter.h" />
     <ClInclude Include="test_db.h" />
+    <ClInclude Include="tool.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="buff.cpp" />
     <ClCompile Include="db_work.cpp" />
+    <ClCompile Include="Login.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="db.cpp" />
     <ClCompile Include="ringbuff.cpp" />

@@ -18,14 +18,11 @@ int main(int argc, char* argv[])
 {
 	try
 	{
-		//// 初始化
-		//Server::New();
-		//// 开始循环
-		//Server::GetInstance()->run();
-		//std::cout << "finish init server...." << std::endl;
-		// 测试
-		test_db test;
-		test.test3();
+		// 初始化
+		Server::New();
+		// 开始循环
+		Server::GetInstance()->run();
+		std::cout << "finish init server...." << std::endl;
 
 		cin.get();
 		return 0;

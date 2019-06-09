@@ -9,21 +9,15 @@
 #ifndef _login_
 #define _login_
 #include "login_proto.h"
+#include "db_work.h"
 
 class Login
 {
 public:
-	static void CreateRole(const char* msg);
-	void InitRole(const char* msg);
-	static void Start();
+	static void OnLogin(const char* msg);
+	static void _lookup_role_fun(DBWork* db_work, string name, string pass);
 private:
 };
-
-void Login::CreateRole(const char* msg)
-{
-	Proto::Login* login_s = (Proto::Login*)msg;
-	printf("create role %s %s", login_s->name, login_s->password);
-}
 
 
 

@@ -181,6 +181,7 @@ public:
 	void listen();
 	void connect_handle(_SessionPtr, boost::system::error_code);
 	void run();
+	void _real_run();
 };
 
 Network::Network(int port):
@@ -214,7 +215,13 @@ void Network::listen()
 	this->acceptor.async_accept(session->socket, boost::bind(&Network::connect_handle, this, session, boost::asio::placeholders::error));
 }
 
-void Network::run()
+void Network::_real_run()
 {
 	this->service.run();
+}
+
+void Network::run()
+{
+	thread* t = new thread(&Network::_real_run, this);
+	t->detach();
 }

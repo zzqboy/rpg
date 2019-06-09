@@ -42,7 +42,7 @@ void MessageDispatch::Dispatch(int msg_id, const char* message)
 	auto iter = this->fun_map.find(msg_id);
 	if (iter == this->fun_map.end())
 	{
-		printf("处理消息时没找到注册函数 %i", msg_id);
+		printf("处理消息时没找到注册函数 %i\n", msg_id);
 	}
 	else
 	{
@@ -54,5 +54,5 @@ void MessageDispatch::Dispatch(int msg_id, const char* message)
 void MessageDispatch::InitEvent()
 {
 	// 登录协议
-	this->Register(1, Login::CreateRole);
+	this->Register(1, Login::OnLogin);
 }
