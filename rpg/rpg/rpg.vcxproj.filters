@@ -110,5 +110,11 @@
     <ClCompile Include="Login.cpp">
       <Filter>源文件\login</Filter>
     </ClCompile>
+    <ClCompile Include="network.cpp">
+      <Filter>源文件\network</Filter>
+    </ClCompile>
+    <ClCompile Include="message_dispatch.cpp">
+      <Filter>源文件\network</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

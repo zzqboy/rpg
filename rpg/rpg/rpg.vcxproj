@@ -161,6 +161,8 @@
     <ClCompile Include="Login.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="db.cpp" />
+    <ClCompile Include="message_dispatch.cpp" />
+    <ClCompile Include="network.cpp" />
     <ClCompile Include="ringbuff.cpp" />
     <ClCompile Include="test_db.cpp" />
   </ItemGroup>

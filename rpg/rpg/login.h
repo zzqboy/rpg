@@ -9,13 +9,11 @@
 #ifndef _login_
 #define _login_
 #include "login_proto.h"
-#include "db_work.h"
 
 class Login
 {
 public:
 	static void OnLogin(const char* msg);
-	static void _lookup_role_fun(DBWork* db_work, string name, string pass);
 private:
 };
 
